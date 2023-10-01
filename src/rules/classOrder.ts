@@ -61,6 +61,14 @@ const order = (node: CallExpression, context: eslint.Rule.RuleContext) => {
     })
     .map((identifier) => identifier.name);
 
+  const callExpressions = node.arguments
+    .filter(function nonClasses<T extends typeof node.arguments[number]>(
+      argument: T
+    ): argument is Extract<T, { type: "CallExpression" }> {
+      return argument.type === "CallExpression";
+    })
+    .map((callExpression) => context.getSourceCode().getText(callExpression));
+
   const classList = node.arguments
     .filter(function nonClasses<T extends typeof node.arguments[number]>(
       argument: T
@@ -79,6 +87,8 @@ const order = (node: CallExpression, context: eslint.Rule.RuleContext) => {
     text: `ct("${sortedClassList.join('", "')}"${
       identifiers.length ? ", " : ""
     }${identifiers.join(", ")}${
+      callExpressions.length ? ", " : ""
+    }${callExpressions.join(", ")}${
       conditionalExpressions.length ? ", " : ""
     }${conditionalExpressions.join(", ")})`,
   };
