@@ -132,3 +132,36 @@ ruleTester.run("class-order", rule, {
     },
   ],
 });
+
+const validWithCallExpressions =
+  'ct("other", "font-bold", "text-sm", "text-indigo-600", "uppercase", "tracking-wide", "sm:tracking-wider", otherStyle, someFunctionThatReturnsClasses(), videoRef.current ? ct("font-bold", "text-sm") : "")';
+
+ruleTester.run("class-order", rule, {
+  valid: [validWithCallExpressions],
+
+  invalid: [
+    {
+      code: `ct(
+        otherStyle,
+        "font-bold",
+        "uppercase",
+        "other",
+        videoRef.current ? ct("text-sm", "font-bold") : "",
+        "sm:tracking-wider",
+        "tracking-wide",
+        "text-sm",
+        "text-indigo-600",
+        someFunctionThatReturnsClasses()
+      )`,
+      errors: [
+        {
+          type: "CallExpression",
+        },
+        {
+          type: "CallExpression",
+        },
+      ],
+      output: validWithCallExpressions,
+    },
+  ],
+});
